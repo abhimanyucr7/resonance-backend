@@ -23,7 +23,18 @@ app.get("/search", async (req, res) => {
     const response = await fetch(url);
     const data = await response.json();
 
-    res.json(data.results);
+    // 🔹 IMPORTANT: Map iTunes response to frontend Track format
+    const tracks = (data.results || [])
+      .filter((item) => item.previewUrl) // only playable tracks
+      .map((item) => ({
+        id: item.trackId,
+        title: item.trackName,
+        artist: item.artistName,
+        albumArt: item.artworkUrl100,
+        previewUrl: item.previewUrl
+      }));
+
+    res.json(tracks);
   } catch (err) {
     console.error("Search failed:", err);
     res.status(500).json([]);
